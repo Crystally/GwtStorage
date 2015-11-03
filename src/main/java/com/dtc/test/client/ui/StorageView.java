@@ -26,7 +26,6 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 
 	private static StorageUiBinder uiBinder = GWT.create(StorageUiBinder.class);
 	private static StorageProperty properties = GWT.create(StorageProperty.class);
-	private static ListStore<StorageVO> listStore = new ListStore<StorageVO>(properties.id());
 	
 	interface StorageUiBinder extends UiBinder<Widget, StorageView> {
 	}
@@ -48,7 +47,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.key(), 100,"key"));
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.data(), 100,"data"));
 		ColumnModel<StorageVO> cm = new ColumnModel<StorageVO>(ccList);
-		storageList = new Grid<StorageVO>(listStore, cm);
+		storageList = new Grid<StorageVO>(new ListStore<StorageVO>(properties.id()), cm);
 		storageList.getView().setForceFit(true);
 		// ========= //
 		initWidget(uiBinder.createAndBindUi(this));
@@ -69,24 +68,24 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	@UiHandler("resetStorage")
 	void onReset(SelectEvent s){
 		storage.clear();
-		listStore.clear();
+		storageList.getStore().clear();
 	}
 	
 	private void setList(StorageVO storageVO) {
-		for (StorageVO s : listStore.getAll()) {
+		for (StorageVO s : storageList.getStore().getAll()) {
 			if (s.getKey().equals(storageVO.getKey())) {
-				listStore.clear();
+				storageList.getStore().clear();
 				initList();
 				return;
 			}
 		}
-		listStore.add(storageVO);
+		storageList.getStore().add(storageVO);
 	}
 	
 	private void initList(){
 		for (int i = 0; i < storage.getLength(); i++) {
 			String key=storage.key(i);
-			listStore.add(new StorageVO(key, storage.getItem(key)));
+			storageList.getStore().add(new StorageVO(key, storage.getItem(key)));
 		}
 	}
 	
