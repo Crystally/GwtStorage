@@ -13,5 +13,4 @@ public class StorageTestEP implements EntryPoint {
 		storage.edit(storageVO);
 		RootPanel.get().add(storage);
 	}
-
 }

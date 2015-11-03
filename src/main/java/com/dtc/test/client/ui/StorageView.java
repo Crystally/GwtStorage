@@ -26,7 +26,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 
 	private static StorageUiBinder uiBinder = GWT.create(StorageUiBinder.class);
 	private static StorageProperty properties = GWT.create(StorageProperty.class);
-	private static ArrayList<StorageVO> list = new ArrayList<>();
+	private static ListStore<StorageVO> listStore = new ListStore<StorageVO>(properties.id());
 	
 	interface StorageUiBinder extends UiBinder<Widget, StorageView> {
 	}
@@ -35,7 +35,6 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	}
 
 	final Storage storage=Storage.getLocalStorageIfSupported();
-	final String s=generateString();
 	Driver driver=GWT.create(Driver.class);
 	
 	@UiField TextField key;
@@ -49,62 +48,46 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.key(), 100,"key"));
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.data(), 100,"data"));
 		ColumnModel<StorageVO> cm = new ColumnModel<StorageVO>(ccList);
-		storageList = new Grid<StorageVO>(new ListStore<>(properties.id()), cm);
+		storageList = new Grid<StorageVO>(listStore, cm);
 		storageList.getView().setForceFit(true);
 		// ========= //
 		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
 		initList();
-		reset();
 	}
 	
 	@UiHandler("saveStorage")
 	void onSave(SelectEvent selectEvent){
 		StorageVO storageVO=driver.flush();
-		if (Storage.isLocalStorageSupported()) {
+		if (storage!=null) {
 			storage.setItem(storageVO.getKey(), storageVO.getData());
 			edit(new StorageVO());
-			getList(storageVO);
-			reset();
+			setList(storageVO);
 		}
 	}
 	
 	@UiHandler("resetStorage")
-	void onRest(SelectEvent s){
+	void onReset(SelectEvent s){
 		storage.clear();
-		list=new ArrayList<>();
-		storageList.getStore().clear();
+		listStore.clear();
 	}
 	
-	private void getList(StorageVO storageVO) {
-		for (StorageVO s : list) {
+	private void setList(StorageVO storageVO) {
+		for (StorageVO s : listStore.getAll()) {
 			if (s.getKey().equals(storageVO.getKey())) {
-				s.setData(storageVO.getData());
+				listStore.clear();
+				initList();
 				return;
 			}
 		}
-		list.add(storageVO);
+		listStore.add(storageVO);
 	}
 	
 	private void initList(){
 		for (int i = 0; i < storage.getLength(); i++) {
 			String key=storage.key(i);
-			StorageVO storageVO=new StorageVO(key, storage.getItem(key));
-			list.add(storageVO);
+			listStore.add(new StorageVO(key, storage.getItem(key)));
 		}
-	}
-	
-	private String generateString() {
-		String a = "";
-		for (int i = 0; i < 256; i++) {
-			a=a+"12345678";
-		}
-		return a;
-	}
-	
-	private void reset() {
-		storageList.getStore().clear();
-		storageList.getStore().addAll(list);
 	}
 	
 	public void edit(StorageVO storageVO) {

@@ -1,8 +1,7 @@
 package com.dtc.test.shared.vo;
 
-import com.google.gwt.user.client.rpc.IsSerializable;
 
-public class StorageVO implements IsSerializable {
+public class StorageVO{
 	private String key;
 	private String data;
 	public StorageVO() {
