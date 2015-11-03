@@ -61,7 +61,8 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		// ========= //
 		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
-		initList();
+		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
+		resetEditor();
 	}
 	
 	@UiHandler("saveStorage")
@@ -75,15 +76,13 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		StorageVO voInStore = storageList.getStore().findModel(storageVO);
 		
 		if (voInStore == null) {
-			storageList.getStore().add(voInStore);
-			return;
+			storageList.getStore().add(storageVO);
+		} else {
+			voInStore.setData(storageVO.getData());
+			storageList.getView().refresh(false);
 		}
 		
-		voInStore.setData(storageVO.getData());
-		storageList.getView().refresh(false);
-		
-		//用這個方法清空編輯區 XD
-		driver.edit(new StorageVO());
+		resetEditor();
 	}
 	
 	@UiHandler("resetStorage")
@@ -92,11 +91,18 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		storageList.getStore().clear();
 	}
 	
-	private void initList(){
+	@UiHandler("refresh")
+	void onRefresh(SelectEvent s){
+		storageList.getStore().clear();
+		
 		for (int i = 0; i < storage.getLength(); i++) {
 			String key=storage.key(i);
 			storageList.getStore().add(new StorageVO(key, storage.getItem(key)));
 		}
+	}
+	
+	private void resetEditor() {
+		driver.edit(new StorageVO());
 	}
 	
 	interface StorageProperty extends PropertyAccess<StorageVO> {
