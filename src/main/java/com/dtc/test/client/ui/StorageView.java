@@ -72,14 +72,15 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	}
 	
 	private void setList(StorageVO storageVO) {
-		for (StorageVO s : storageList.getStore().getAll()) {
-			if (s.getKey().equals(storageVO.getKey())) {
-				storageList.getStore().clear();
-				initList();
-				return;
-			}
+		StorageVO voInStore = storageList.getStore().findModel(storageVO);
+		
+		if (voInStore == null) {
+			storageList.getStore().add(voInStore);
+			return;
 		}
-		storageList.getStore().add(storageVO);
+		
+		voInStore.setData(storageVO.getData());
+		storageList.getView().refresh(false);
 	}
 	
 	private void initList(){
