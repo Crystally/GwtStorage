@@ -16,11 +16,13 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.Composite;
+import com.sencha.gxt.widget.core.client.container.CenterLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 
 public class StorageView extends Composite implements Editor<StorageVO>{
 
@@ -42,6 +44,13 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	@Ignore Grid<StorageVO> storageList;
 	
 	public StorageView() {
+		if (!Storage.isLocalStorageSupported()) {
+			CenterLayoutContainer container = new CenterLayoutContainer();
+			container.add(new LabelToolItem("Local Storage is not supported"));
+			initWidget(container);
+			return;
+		}
+
 		// ==== init grid ==== //
 		ArrayList<ColumnConfig<StorageVO, ?>> ccList = new ArrayList<>();
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.key(), 100,"key"));
@@ -74,7 +83,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		storageList.getView().refresh(false);
 		
 		//用這個方法清空編輯區 XD
-		edit(new StorageVO());
+		driver.edit(new StorageVO());
 	}
 	
 	@UiHandler("resetStorage")
@@ -90,10 +99,6 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		}
 	}
 	
-	public void edit(StorageVO storageVO) {
-		driver.edit(storageVO);
-	}
-
 	interface StorageProperty extends PropertyAccess<StorageVO> {
 		@Path("key")
 		ModelKeyProvider<StorageVO> id();
