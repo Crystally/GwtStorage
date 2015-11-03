@@ -58,20 +58,11 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	@UiHandler("saveStorage")
 	void onSave(SelectEvent selectEvent){
 		StorageVO storageVO=driver.flush();
-		if (storage!=null) {
-			storage.setItem(storageVO.getKey(), storageVO.getData());
-			edit(new StorageVO());
-			setList(storageVO);
-		}
-	}
-	
-	@UiHandler("resetStorage")
-	void onReset(SelectEvent s){
-		storage.clear();
-		storageList.getStore().clear();
-	}
-	
-	private void setList(StorageVO storageVO) {
+		
+		//維護 local storage 的資料
+		storage.setItem(storageVO.getKey(), storageVO.getData());
+
+		//維護畫面上的資料，雖然可以直接用 initList，不過那樣子效率不好
 		StorageVO voInStore = storageList.getStore().findModel(storageVO);
 		
 		if (voInStore == null) {
@@ -81,6 +72,15 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		
 		voInStore.setData(storageVO.getData());
 		storageList.getView().refresh(false);
+		
+		//用這個方法清空編輯區 XD
+		edit(new StorageVO());
+	}
+	
+	@UiHandler("resetStorage")
+	void onReset(SelectEvent s){
+		storage.clear();
+		storageList.getStore().clear();
 	}
 	
 	private void initList(){
