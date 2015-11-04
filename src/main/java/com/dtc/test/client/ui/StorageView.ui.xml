@@ -26,6 +26,9 @@
 				<b:TextButton ui:field="saveStorage" text="保存" />
 			</c:button>
 			<c:button>
+				<b:TextButton ui:field="refresh" text="重新整理" />
+			</c:button>			
+			<c:button>
 				<b:TextButton ui:field="resetStorage" text="清除" />
 			</c:button>
 		</c:FramedPanel>

@@ -16,17 +16,18 @@ import com.sencha.gxt.data.shared.ListStore;
 import com.sencha.gxt.data.shared.ModelKeyProvider;
 import com.sencha.gxt.data.shared.PropertyAccess;
 import com.sencha.gxt.widget.core.client.Composite;
+import com.sencha.gxt.widget.core.client.container.CenterLayoutContainer;
 import com.sencha.gxt.widget.core.client.event.SelectEvent;
 import com.sencha.gxt.widget.core.client.form.TextField;
 import com.sencha.gxt.widget.core.client.grid.ColumnConfig;
 import com.sencha.gxt.widget.core.client.grid.ColumnModel;
 import com.sencha.gxt.widget.core.client.grid.Grid;
+import com.sencha.gxt.widget.core.client.toolbar.LabelToolItem;
 
 public class StorageView extends Composite implements Editor<StorageVO>{
 
 	private static StorageUiBinder uiBinder = GWT.create(StorageUiBinder.class);
 	private static StorageProperty properties = GWT.create(StorageProperty.class);
-	private static ListStore<StorageVO> listStore = new ListStore<StorageVO>(properties.id());
 	
 	interface StorageUiBinder extends UiBinder<Widget, StorageView> {
 	}
@@ -43,57 +44,67 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	@Ignore Grid<StorageVO> storageList;
 	
 	public StorageView() {
+		if (!Storage.isLocalStorageSupported()) {
+			CenterLayoutContainer container = new CenterLayoutContainer();
+			container.add(new LabelToolItem("Local Storage is not supported"));
+			initWidget(container);
+			return;
+		}
+
 		// ==== init grid ==== //
 		ArrayList<ColumnConfig<StorageVO, ?>> ccList = new ArrayList<>();
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.key(), 100,"key"));
 		ccList.add(new ColumnConfig<StorageVO, String>(properties.data(), 100,"data"));
 		ColumnModel<StorageVO> cm = new ColumnModel<StorageVO>(ccList);
-		storageList = new Grid<StorageVO>(listStore, cm);
+		storageList = new Grid<StorageVO>(new ListStore<StorageVO>(properties.id()), cm);
 		storageList.getView().setForceFit(true);
 		// ========= //
 		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
-		initList();
+		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
+		resetEditor();
 	}
 	
 	@UiHandler("saveStorage")
 	void onSave(SelectEvent selectEvent){
 		StorageVO storageVO=driver.flush();
-		if (storage!=null) {
-			storage.setItem(storageVO.getKey(), storageVO.getData());
-			edit(new StorageVO());
-			setList(storageVO);
+		
+		//維護 local storage 的資料
+		storage.setItem(storageVO.getKey(), storageVO.getData());
+
+		//維護畫面上的資料，雖然可以直接用 initList，不過那樣子效率不好
+		StorageVO voInStore = storageList.getStore().findModel(storageVO);
+		
+		if (voInStore == null) {
+			storageList.getStore().add(storageVO);
+		} else {
+			voInStore.setData(storageVO.getData());
+			storageList.getView().refresh(false);
 		}
+		
+		resetEditor();
 	}
 	
 	@UiHandler("resetStorage")
 	void onReset(SelectEvent s){
 		storage.clear();
-		listStore.clear();
+		storageList.getStore().clear();
 	}
 	
-	private void setList(StorageVO storageVO) {
-		for (StorageVO s : listStore.getAll()) {
-			if (s.getKey().equals(storageVO.getKey())) {
-				listStore.clear();
-				initList();
-				return;
-			}
-		}
-		listStore.add(storageVO);
-	}
-	
-	private void initList(){
+	@UiHandler("refresh")
+	void onRefresh(SelectEvent s){
+		storageList.getStore().clear();
+		
 		for (int i = 0; i < storage.getLength(); i++) {
 			String key=storage.key(i);
-			listStore.add(new StorageVO(key, storage.getItem(key)));
+			storageList.getStore().add(new StorageVO(key, storage.getItem(key)));
 		}
 	}
 	
-	public void edit(StorageVO storageVO) {
-		driver.edit(storageVO);
+	private void resetEditor() {
+		driver.edit(new StorageVO());
 	}
-
+	
 	interface StorageProperty extends PropertyAccess<StorageVO> {
 		@Path("key")
 		ModelKeyProvider<StorageVO> id();
