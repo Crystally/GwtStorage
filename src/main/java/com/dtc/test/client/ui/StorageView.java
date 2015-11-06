@@ -2,7 +2,6 @@ package com.dtc.test.client.ui;
 
 import java.util.ArrayList;
 
-import com.dtc.test.client.TestStorage;
 import com.dtc.test.shared.vo.StorageVO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -11,6 +10,7 @@ import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.Widget;
 import com.sencha.gxt.core.client.ValueProvider;
 import com.sencha.gxt.data.shared.ListStore;
@@ -41,6 +41,10 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	
 	@UiField TextField key;
 	@UiField TextField data;
+	@Ignore
+	@UiField Label keyByteLabel;
+	@Ignore
+	@UiField Label valueByteLabel;
 	@UiField(provided = true)
 	@Ignore Grid<StorageVO> storageList;
 	
@@ -64,8 +68,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		driver.initialize(this);
 		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
 		resetEditor();
-		TestStorage testStorage=new TestStorage();
-		testStorage.test();
+		getByte();
 	}
 	
 	@UiHandler("saveStorage")
@@ -86,12 +89,14 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		}
 		
 		resetEditor();
+		getByte();
 	}
 	
 	@UiHandler("resetStorage")
 	void onReset(SelectEvent s){
 		storage.clear();
 		storageList.getStore().clear();
+		getByte();
 	}
 	
 	@UiHandler("refresh")
@@ -106,6 +111,18 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	
 	private void resetEditor() {
 		driver.edit(new StorageVO());
+	}
+	
+	private void getByte(){
+		int keyByte=0;
+		int valueByte=0;
+		for (int i = 0; i < storage.getLength(); i++) {
+			String key=storage.key(i);
+			keyByte += key.getBytes().length;
+			valueByte += storage.getItem(key).length();
+		}
+		keyByteLabel.setText(String.valueOf(keyByte));
+		valueByteLabel.setText(String.valueOf(valueByte));
 	}
 	
 	interface StorageProperty extends PropertyAccess<StorageVO> {

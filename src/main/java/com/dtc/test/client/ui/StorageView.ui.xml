@@ -32,5 +32,15 @@
 				<b:TextButton ui:field="resetStorage" text="清除" />
 			</c:button>
 		</c:FramedPanel>
+		<f:FieldLabel text="key占用byte数">
+			<f:widget>
+				<g:Label ui:field="keyByteLabel"></g:Label>
+			</f:widget>
+		</f:FieldLabel>
+		<f:FieldLabel text="value占用byte数">
+			<f:widget>
+				<g:Label ui:field="valueByteLabel"></g:Label>
+			</f:widget>
+		</f:FieldLabel>
 	</container:VerticalLayoutContainer>
 </ui:UiBinder> 
