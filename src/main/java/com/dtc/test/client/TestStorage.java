@@ -7,15 +7,14 @@ public class TestStorage {
 	Storage storage = Storage.getLocalStorageIfSupported();
 
 	public void test() {
-		boolean b = true;
 		StringBuilder stringBuilder = Generate.generateString();
-		while (b) {
+		while (true) {
 			try {
 				storage.setItem("1", stringBuilder.append("1").toString());
 			} catch (Exception e) {
 				if (e.getMessage().contains("QuotaExceededError")) {
 					GWT.log(String.valueOf(stringBuilder.toString().getBytes().length));
-					b = false;
+					break;
 				}
 			}
 		}
