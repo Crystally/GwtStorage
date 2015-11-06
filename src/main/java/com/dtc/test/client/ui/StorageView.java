@@ -2,6 +2,7 @@ package com.dtc.test.client.ui;
 
 import java.util.ArrayList;
 
+import com.dtc.test.client.TestStorage;
 import com.dtc.test.shared.vo.StorageVO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
@@ -63,6 +64,8 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		driver.initialize(this);
 		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
 		resetEditor();
+		TestStorage testStorage=new TestStorage();
+		testStorage.test();
 	}
 	
 	@UiHandler("saveStorage")
@@ -74,7 +77,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 
 		//維護畫面上的資料，雖然可以直接用 initList，不過那樣子效率不好
 		StorageVO voInStore = storageList.getStore().findModel(storageVO);
-		
+
 		if (voInStore == null) {
 			storageList.getStore().add(storageVO);
 		} else {
