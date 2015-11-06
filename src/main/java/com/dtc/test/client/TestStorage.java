@@ -22,61 +22,39 @@ public class TestStorage {
 
 	// chrome value存入极限值测试,设1的时候是超过容量上限
 	public void testSetValue(int over) {
-		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < 5119; i++) {
-			stringBuilder.append(Generate.generateString());
-		}
-		for (int i = 0; i < 1023; i++) {
-			stringBuilder.append("1");
-		}
-		if (over == 1) {
-			stringBuilder.append("1");
-		}
-		storage.setItem("1", stringBuilder.toString());
+		build(5119, 1023, over, false);
 	}
-
+	
 	// chrome value读取极限值测试,设1的时候是超过容量上限
 	public void testReadValue(int over) {
-		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < 5119; i++) {
-			stringBuilder.append(Generate.generateString());
-		}
-		for (int i = 0; i < 1001; i++) {
-			stringBuilder.append("1");
-		}
-		if (over == 1) {
-			stringBuilder.append("1");
-		}
-		storage.setItem("1", stringBuilder.toString());
+		build(5119, 1001, over, false);
 	}
 
 	// chrome key存入极限值测试,设1的时候是超过容量上限
 	public void testSetKey(int over) {
-		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < 5119; i++) {
-			stringBuilder.append(Generate.generateString());
-		}
-		for (int i = 0; i < 1024; i++) {
-			stringBuilder.append("1");
-		}
-		if (over == 1) {
-			stringBuilder.append("1");
-		}
-		storage.setItem(stringBuilder.toString(), "");
+		build(5119, 1024, over, true);
 	}
 
 	// chrome key读取极限值测试,设1的时候是超过容量上限
 	public void testReadKey(int over) {
+		build(5119, 1002, over, true);
+	}
+	
+	private void build(int i1, int i2, int over, boolean keyOrData) {
 		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < 5119; i++) {
+		for (int i = 0; i < i1; i++) {
 			stringBuilder.append(Generate.generateString());
 		}
-		for (int i = 0; i < 1002; i++) {
+		for (int i = 0; i < i2; i++) {
 			stringBuilder.append("1");
 		}
 		if (over == 1) {
 			stringBuilder.append("1");
 		}
-		storage.setItem(stringBuilder.toString(), "");
+		if (keyOrData) {
+			storage.setItem(stringBuilder.toString(), "");
+		} else {
+			storage.setItem("1", stringBuilder.toString());
+		}
 	}
 }
