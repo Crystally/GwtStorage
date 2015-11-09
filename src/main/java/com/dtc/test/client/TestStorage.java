@@ -27,35 +27,40 @@ public class TestStorage {
 	}
 
 	// chrome value存入极限值测试,设1的时候是超过容量上限
-	public void testSetValue(int over) {
-		build(5119, 1023, over, false);
+	public void testSetValue(boolean over) {
+		build(4, 1023, 1023, over, false);
 	}
-	
+
 	// chrome value读取极限值测试,设1的时候是超过容量上限
-	public void testReadValue(int over) {
-		build(5119, 1001, over, false);
+	public void testReadValue(boolean over) {
+		build(4, 1023, 1001, over, false);
 	}
 
 	// chrome key存入极限值测试,设1的时候是超过容量上限
-	public void testSetKey(int over) {
-		build(5119, 1024, over, true);
+	public void testSetKey(boolean over) {
+		build(4, 1023, 1024, over, true);
 	}
 
 	// chrome key读取极限值测试,设1的时候是超过容量上限
-	public void testReadKey(int over) {
-		build(5119, 1002, over, true);
+	public void testReadKey(boolean over) {
+		build(4, 1023, 1002, over, true);
 	}
 	
-	@Deprecated
-	private void build(int i1, int i2, int over, boolean keyOrData) {
+	// 测试容量上限是不是包含key和value
+	public void testKeyValue(){
+		StringBuilder stringBuilder=new StringBuilder();
+		stringBuilder.append(Generate.byKB(1023));
+		stringBuilder.append(Generate.byByte(1023));
+		for (int i = 0; i < 5; i++) {
+			storage.setItem(String.valueOf(i), stringBuilder.toString());
+		}
+	}
+	private void build(int mb,int kb, int b, boolean over, boolean keyOrData) {
 		StringBuilder stringBuilder = new StringBuilder();
-		for (int i = 0; i < i1; i++) {
-			stringBuilder.append(Generate.generateString());
-		}
-		for (int i = 0; i < i2; i++) {
-			stringBuilder.append("1");
-		}
-		if (over == 1) {
+		stringBuilder.append(Generate.byMB(mb));
+		stringBuilder.append(Generate.byKB(kb));
+		stringBuilder.append(Generate.byByte(b));
+		if (over) {
 			stringBuilder.append("1");
 		}
 		if (keyOrData) {

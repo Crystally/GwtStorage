@@ -42,5 +42,10 @@
 				<g:Label ui:field="valueByteLabel"></g:Label>
 			</f:widget>
 		</f:FieldLabel>
+		<f:FieldLabel text="资料占用byte数">
+			<f:widget>
+				<g:Label ui:field="totalByteLabel"></g:Label>
+			</f:widget>
+		</f:FieldLabel>
 	</container:VerticalLayoutContainer>
 </ui:UiBinder> 

@@ -45,6 +45,8 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 	@UiField Label keyByteLabel;
 	@Ignore
 	@UiField Label valueByteLabel;
+	@Ignore
+	@UiField Label totalByteLabel;
 	@UiField(provided = true)
 	@Ignore Grid<StorageVO> storageList;
 	
@@ -68,7 +70,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		driver.initialize(this);
 		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
 		resetEditor();
-		getByte();
+		displayCapacity();
 	}
 	
 	@UiHandler("saveStorage")
@@ -89,14 +91,14 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		}
 		
 		resetEditor();
-		getByte();
+		displayCapacity();
 	}
 	
 	@UiHandler("resetStorage")
 	void onReset(SelectEvent s){
 		storage.clear();
 		storageList.getStore().clear();
-		getByte();
+		displayCapacity();
 	}
 	
 	@UiHandler("refresh")
@@ -113,7 +115,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		driver.edit(new StorageVO());
 	}
 	
-	private void getByte(){
+	private void displayCapacity(){
 		int keyByte=0;
 		int valueByte=0;
 		for (int i = 0; i < storage.getLength(); i++) {
@@ -123,6 +125,7 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		}
 		keyByteLabel.setText(String.valueOf(keyByte));
 		valueByteLabel.setText(String.valueOf(valueByte));
+		totalByteLabel.setText(String.valueOf(keyByte+valueByte));
 	}
 	
 	interface StorageProperty extends PropertyAccess<StorageVO> {
