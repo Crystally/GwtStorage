@@ -6,7 +6,7 @@ import java.util.Arrays;
 public class Generate {
 	public static String byByte(int amount) {
 		char[] charArray = new char[amount];
-		Arrays.fill(charArray, '1');
+		Arrays.fill(charArray, '0');
 		return new String(charArray);
 	}
 	
