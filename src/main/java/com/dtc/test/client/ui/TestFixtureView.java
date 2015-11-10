@@ -32,8 +32,6 @@ public class TestFixtureView extends Composite implements Editor<TestFixtureVO> 
 	@UiField IntegerField number;
 	@UiField IntegerField keyLength;
 	@UiField IntegerField valueLength;
-	@UiField IntegerField key;
-	@UiField IntegerField value;
 	@Ignore StorageView storageView;
 
 	public void setStorageView(StorageView view) {
@@ -48,42 +46,36 @@ public class TestFixtureView extends Composite implements Editor<TestFixtureVO> 
 
 	@UiHandler("save")
 	void onSave(SelectEvent selectEvent) {
-		storage.clear();
-		storageView.storageList.getStore().clear();
 		TestFixtureVO testFixtureVO = driver.flush();
 		String key = Generate.byByte(testFixtureVO.getKeyLength());
-		NumberFormat numberFormat=NumberFormat.getFormat(key);
-		for (int i = 0; i < testFixtureVO.getNumber(); i++) {
-			String keyString=numberFormat.format(Integer.parseInt(key) + i);
-			if (keyString.length()>testFixtureVO.getKeyLength()) {
-				break;
+		String value = Generate.byByte(testFixtureVO.getValueLength());
+		if (testFixtureVO.getNumber() != null) {
+			storage.clear();
+			storageView.storageList.getStore().clear();
+			NumberFormat numberFormat=NumberFormat.getFormat(key);
+			for (int i = 0; i < testFixtureVO.getNumber(); i++) {
+				String keyString=numberFormat.format(Integer.parseInt(key) + i);
+				if (keyString.length()>testFixtureVO.getKeyLength()) {
+					break;
+				}
+				storage.setItem(keyString, value);
+				storageView.storageList.getStore().add(new StorageVO(keyString, value));
 			}
-			String dataString = Generate.byByte(testFixtureVO.getValueLength());
-			storage.setItem(keyString, dataString);
-			storageView.storageList.getStore().add(new StorageVO(keyString, dataString));
+		}else {
+			storage.setItem(key, value);
+			StorageVO storageVO=new StorageVO(key, value);
+			StorageVO voInStore = storageView.storageList.getStore().findModel(storageVO);
+			if (voInStore == null) {
+				storageView.storageList.getStore().add(storageVO);
+			} else {
+				voInStore.setData(value);
+				storageView.storageList.getView().refresh(false);
+			}
 		}
 		storageView.displayCapacity();
 		edit();
 	}
-	
-	@UiHandler("specifySave")
-	void onSpecifySave(SelectEvent selectEvent){
-		TestFixtureVO testFixtureVO = driver.flush();
-		String key = Generate.byByte(testFixtureVO.getKey());
-		String value = Generate.byByte(testFixtureVO.getValue());
-		storage.setItem(key, value);
-		StorageVO storageVO=new StorageVO(key, value);
-		StorageVO voInStore = storageView.storageList.getStore().findModel(storageVO);
-		if (voInStore == null) {
-			storageView.storageList.getStore().add(storageVO);
-		} else {
-			voInStore.setData(value);
-			storageView.storageList.getView().refresh(false);
-		}
-		storageView.displayCapacity();
-		edit();
-	}
-	
+
 	private void edit() {
 		driver.edit(new TestFixtureVO());
 	}

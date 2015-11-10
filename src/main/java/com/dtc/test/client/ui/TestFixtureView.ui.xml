@@ -5,45 +5,26 @@
 	xmlns:core="urn:import:com.sencha.gxt.widget.core.client" 
 	xmlns:f="urn:import:com.sencha.gxt.widget.core.client.form"
 	xmlns:b="urn:import:com.sencha.gxt.widget.core.client.button">
-	<c:HorizontalLayoutContainer>
-		<core:FramedPanel width="300" headingText="自定义测试">
-			<c:VerticalLayoutContainer>
-				<f:FieldLabel text="笔数">
-					<f:widget>
-						<f:IntegerField ui:field="number" />
-					</f:widget>
-				</f:FieldLabel>
-				<f:FieldLabel text="key长度">
-					<f:widget>
-						<f:IntegerField ui:field="keyLength" />
-					</f:widget>
-				</f:FieldLabel>
-				<f:FieldLabel text="value长度">
-					<f:widget>
-						<f:IntegerField ui:field="valueLength" />
-					</f:widget>
-				</f:FieldLabel>
-			</c:VerticalLayoutContainer>
-			<core:button>
-				<b:TextButton ui:field="save" text="保存"></b:TextButton>
-			</core:button>
-		</core:FramedPanel>
-		<core:FramedPanel width="300" headingText="指定值测试">
-			<c:VerticalLayoutContainer>
-				<f:FieldLabel text="key长度">
-					<f:widget>
-						<f:IntegerField ui:field="key" />
-					</f:widget>
-				</f:FieldLabel>
-				<f:FieldLabel text="value长度">
-					<f:widget>
-						<f:IntegerField ui:field="value" />
-					</f:widget>
-				</f:FieldLabel>
-			</c:VerticalLayoutContainer>
-			<core:button>
-				<b:TextButton ui:field="specifySave" text="保存"></b:TextButton>
-			</core:button>
-		</core:FramedPanel>
-	</c:HorizontalLayoutContainer>
+	<core:FramedPanel width="300" headingText="笔数为空值时为单笔并不清空">
+		<c:VerticalLayoutContainer>
+			<f:FieldLabel text="笔数">
+				<f:widget>
+					<f:IntegerField ui:field="number" />
+				</f:widget>
+			</f:FieldLabel>
+			<f:FieldLabel text="key长度">
+				<f:widget>
+					<f:IntegerField ui:field="keyLength" />
+				</f:widget>
+			</f:FieldLabel>
+			<f:FieldLabel text="value长度">
+				<f:widget>
+					<f:IntegerField ui:field="valueLength" />
+				</f:widget>
+			</f:FieldLabel>
+		</c:VerticalLayoutContainer>
+		<core:button>
+			<b:TextButton ui:field="save" text="保存"></b:TextButton>
+		</core:button>
+	</core:FramedPanel>
 </ui:UiBinder> 
