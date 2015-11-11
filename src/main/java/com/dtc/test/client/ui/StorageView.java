@@ -7,6 +7,8 @@ import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
 import com.google.gwt.storage.client.Storage;
+import com.google.gwt.storage.client.StorageEvent;
+import com.google.gwt.storage.client.StorageEvent.Handler;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -57,6 +59,17 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 			initWidget(container);
 			return;
 		}
+		
+		Storage.addStorageEventHandler(new Handler() {
+			@Override
+			public void onStorageChange(StorageEvent event) {
+				//不是 storage 產生的 event 就忽略不管
+				if (storage != event.getStorageArea()) { return ;}
+				
+				//顧及 storage.clear() 的狀況，所以直接要求 storageList 清空重建
+				refresh();
+			}
+		});
 
 		// ==== init grid ==== //
 		ArrayList<ColumnConfig<StorageVO, ?>> ccList = new ArrayList<>();
@@ -68,9 +81,8 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		// ========= //
 		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
-		onRefresh(null);	//不是很 readable 的招數，不過很實用  [逃]
+		refresh();
 		resetEditor();
-		displayCapacity();
 	}
 	
 	@UiHandler("saveStorage")
@@ -91,24 +103,22 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		}
 		
 		resetEditor();
-		displayCapacity();
 	}
 	
 	@UiHandler("resetStorage")
 	void onReset(SelectEvent s){
 		storage.clear();
-		storageList.getStore().clear();
-		displayCapacity();
 	}
 	
-	@UiHandler("refresh")
-	void onRefresh(SelectEvent s){
+	private void refresh(){
 		storageList.getStore().clear();
 		
 		for (int i = 0; i < storage.getLength(); i++) {
 			String key=storage.key(i);
 			storageList.getStore().add(new StorageVO(key, storage.getItem(key)));
 		}
+		
+		displayCapacity();
 	}
 	
 	private void resetEditor() {
