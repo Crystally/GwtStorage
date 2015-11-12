@@ -1,12 +1,16 @@
 package com.dtc.test.client.ui;
 
+import java.io.UnsupportedEncodingException;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
+
 import com.dtc.test.client.Generate;
-import com.dtc.test.shared.vo.StorageVO;
 import com.dtc.test.shared.vo.TestFixtureVO;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.editor.client.Editor;
 import com.google.gwt.editor.client.SimpleBeanEditorDriver;
-import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -32,12 +36,7 @@ public class TestFixtureView extends Composite implements Editor<TestFixtureVO> 
 	@UiField IntegerField number;
 	@UiField IntegerField keyLength;
 	@UiField IntegerField valueLength;
-	@Ignore StorageView storageView;
-
-	public void setStorageView(StorageView view) {
-		this.storageView = view;
-	}
-
+	
 	public TestFixtureView() {
 		initWidget(uiBinder.createAndBindUi(this));
 		driver.initialize(this);
@@ -51,31 +50,21 @@ public class TestFixtureView extends Composite implements Editor<TestFixtureVO> 
 		String value = Generate.byByte(testFixtureVO.getValueLength());
 		if (testFixtureVO.getNumber() != null) {
 			storage.clear();
-			storageView.storageList.getStore().clear();
-			NumberFormat numberFormat=NumberFormat.getFormat(key);
 			for (int i = 0; i < testFixtureVO.getNumber(); i++) {
-				String keyString=numberFormat.format(Integer.parseInt(key) + i);
+				String keyString=String.valueOf(i);
 				if (keyString.length()>testFixtureVO.getKeyLength()) {
 					break;
 				}
-				storage.setItem(keyString, value);
-				storageView.storageList.getStore().add(new StorageVO(keyString, value));
+				byte[] b=keyString.getBytes();
+				Arrays.fill(b, b.length, testFixtureVO.getKeyLength(), (byte)0);
+				storage.setItem(new String(b), value);
 			}
 		}else {
 			storage.setItem(key, value);
-			StorageVO storageVO=new StorageVO(key, value);
-			StorageVO voInStore = storageView.storageList.getStore().findModel(storageVO);
-			if (voInStore == null) {
-				storageView.storageList.getStore().add(storageVO);
-			} else {
-				voInStore.setData(value);
-				storageView.storageList.getView().refresh(false);
-			}
 		}
-		storageView.displayCapacity();
 		edit();
 	}
-
+	
 	private void edit() {
 		driver.edit(new TestFixtureVO());
 	}
