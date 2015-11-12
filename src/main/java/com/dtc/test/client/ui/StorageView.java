@@ -91,17 +91,6 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 		
 		//維護 local storage 的資料
 		storage.setItem(storageVO.getKey(), storageVO.getData());
-
-		//維護畫面上的資料，雖然可以直接用 initList，不過那樣子效率不好
-		StorageVO voInStore = storageList.getStore().findModel(storageVO);
-
-		if (voInStore == null) {
-			storageList.getStore().add(storageVO);
-		} else {
-			voInStore.setData(storageVO.getData());
-			storageList.getView().refresh(false);
-		}
-		
 		resetEditor();
 	}
 	

@@ -11,11 +11,8 @@ public class StorageTestEP implements EntryPoint {
 	@Override
 	public void onModuleLoad() {
 		VerticalLayoutContainer verticalLayoutContainer=new VerticalLayoutContainer();
-		TestFixtureView testFixtureView=new TestFixtureView();
-		StorageView storageView=new StorageView();
-		testFixtureView.setStorageView(storageView);
-		verticalLayoutContainer.add(storageView);
-		verticalLayoutContainer.add(testFixtureView);
+		verticalLayoutContainer.add(new StorageView());
+		verticalLayoutContainer.add(new TestFixtureView());
 		Viewport vp = new Viewport();
 		vp.add(verticalLayoutContainer);
 		RootPanel.get().add(vp);

@@ -55,9 +55,8 @@ public class TestFixtureView extends Composite implements Editor<TestFixtureVO> 
 				if (keyString.length()>testFixtureVO.getKeyLength()) {
 					break;
 				}
-				byte[] b=keyString.getBytes();
-				Arrays.fill(b, b.length, testFixtureVO.getKeyLength(), (byte)0);
-				storage.setItem(new String(b), value);
+				keyString+=Generate.byByte(testFixtureVO.getKeyLength()-keyString.length());
+				storage.setItem(keyString, value);
 			}
 		}else {
 			storage.setItem(key, value);
