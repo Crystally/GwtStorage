@@ -122,9 +122,19 @@ public class StorageView extends Composite implements Editor<StorageVO>{
 			keyByte += key.getBytes().length;
 			valueByte += storage.getItem(key).length();
 		}
-		keyByteLabel.setText(String.valueOf(keyByte));
-		valueByteLabel.setText(String.valueOf(valueByte));
-		totalByteLabel.setText(String.valueOf(keyByte+valueByte));
+		keyByteLabel.setText(calculateByte(keyByte));
+		valueByteLabel.setText(calculateByte(valueByte));
+		totalByteLabel.setText(calculateByte(keyByte+valueByte));
+	}
+	
+	private String calculateByte(int b) {
+		StringBuilder s=new StringBuilder();
+		int i;
+		s.append(b/1048576+"MB ");
+		i=b%1048576;
+		s.append(i/1024+"KB ");
+		s.append(i%1024+"Byte");
+		return s.toString();
 	}
 	
 	interface StorageProperty extends PropertyAccess<StorageVO> {
