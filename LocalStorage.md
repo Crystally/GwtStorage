@@ -10,13 +10,13 @@ HTML5 Storage
 
 ## WebStorage 簡介<a id='SummaryOfStorage'></a>
 
-从 GWT2.3 开始，GWT SDK 支持 HTML5 的客户端存储，也被称为"Web Storage"。Web Storage 是 HTML5 新增的本地存储的解决方案，可分为 LocalStorage 和 SessionStorage，在前端开发中经常用到，类似 HTML4 的 cookie，但并不是为了取代 cookie 制定的标准，而是为了解决本来不应该由 cookie 做的，却不得不用 cookie 的本地存储（[部分 browser 支持 Web Storage](http://caniuse.com/#feat=namevalue-storage)）。
+Web Storage 是 HTML5 新增的本地存储的解决方案，在前端开发中经常用到，类似 HTML4 的 cookie，但并不是为了取代 cookie 制定的标准，而是为了解决本来不应该由 cookie 做的，却不得不用 cookie 的本地存储（[部分 browser 支持 Web Storage](http://caniuse.com/#feat=namevalue-storage)）。
 
-cookie 只能提供很小的本地空间存储（每个 cookie 4KB，每个域20个 cookie），发送请求时，cookie 都会传输到服务器端。
+Web Storage 与 Cookie 相比，Web Storage 的本地存储空间更大，而 cookie 只有 4KB。Cookie 的内容会随着请求一并发送到服务器端，而 Web Storage 中的数据仅仅存在本地，不会与服务器发生交互。
 
-Web Storage 提供了更大的本地存储空间，LocalStorage 为每个域 5MB，SessionStorage 不限制本地存储空间大小（仅受系统资源的限制)。发送请求时，不会带 Web Storage 的内容。
- 
 ## SessionStorage/LocalStorage 的差异<a id='SessionStorageAndLocalStorage'></a>
+
+Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）和 SessionStorage（针对一个 session 的数据存储）。
 
 * SessionStorage
 	* 本地存储空间：只受系统资源限制
@@ -27,23 +27,112 @@ Web Storage 提供了更大的本地存储空间，LocalStorage 为每个域 5MB
 	* 持久性：数据一直保存在 client-side，除非被用户或 app 删除
 	* 在其他窗口数据是否可用：在运行同一 app 的同一 browser 中共享
 
-（以下只讨论 LocalStorage）
+## GWT storage API 介紹<a id='Introduction'></a>
 
-## GWT API 介紹<a id='Introduction'></a>
+从 GWT2.3 开始，GWT SDK 支持 HTML5 的 Web Storage。你可以通过调用 Storage.getLocalStorageIfSupported() 或者 Storage.getSessionStorageIfSupported() 取决于你想要使用的 storage 类型，接下来我们只使用 LocalStorage。
 
-* addStorageEventHandler 添加 StorageEvents 事件处理程序
-* getLocalStorageIfSupported 获取一个 Local Storage
-* getSessionStorageIfSupported 获取一个 Session Storage
-* isLocalStorageSupported 判断运行平台是否支持 Storage API 中的 localStorage
-* isSessionStorageSupported 判断运行平台是否支持 Storage API 中的 sessionStorage
-* isSupported 判断运行平台是否支持 Storage API
-* removeStorageEventHandler 取消 StorageEvents 事件处理程序
-* clear 移除所有 Storage 中的记录
-* getItem 获取与指定 key 值关联的记录
-* getLength 获取 Storage 中记录的条数
-* key 根据 index 值获取 key 值
-* removeItem 根据 key 值删除关联记录
-* setItem 设置与唯一 key 值关联的 value 值（key 不能为空字串）
+因为不是所有的 browser 可以支持 Web Storage，所以你在使用前需要检查是否可以使用 HTML5 storage 功能。
+
+如果支持 storage 功能，你得到一个 storage object 后，你就可以向其中写入数据或读取数据。
+
+1. [检查 browser 是否支持 storage](#Check)
+2. [获取 Storage object](#Get)
+3. [将数据写入 Storage](#Write)
+4. [从 Storage 中读取数据](#Read)
+5. [删除数据](#Delete)
+6. [检查 localstorage 是否变动](#Event)
+
+### 检查 browser 是否支持 storage<a id='Check'></a>
+在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能，但并不会有页面上的提示。所以我希望在 browser 不支持 storage 的时候，能在页面上提醒。并且判断过 browser 是否支持 storage 后不需要在操作 storage instance 时再判断。
+
+```
+if (!Storage.isLocalStorageSupported()) {
+	CenterLayoutContainer container = new CenterLayoutContainer();
+	container.add(new LabelToolItem("Local Storage is not supported"));
+	initWidget(container);
+	return;
+}
+```
+
+### 获取 Storage object<a id='Get'></a>
+在判断 browser 是否支持 Web Storage 后，可使用 Storage.getLocalStorageIfSupported() 来获取 localstorage instance，当然也可以使用 Storage.getLocalStorageIfSupported() 来判断 browser 是否支持 Web Storage，因为如果不支持，无法得到 instance，而是得到 null。
+
+```
+import com.google.gwt.storage.client.Storage;
+	private Storage storage = Storage.getLocalStorageIfSupported();
+```
+
+### 将数据写入 Storage<a id='Write'></a>
+
+可以写入你喜欢的任何数据，前提是 key 和 value 都必须为 string 类型。
+
+```
+VerticalLayoutContainer ver=new VerticalLayoutContainer();
+final TextField value=new TextField();
+ver.add(new FieldLabel(value,"value"));
+TextButton save=new TextButton("保存");
+ver.add(save);
+save.addSelectHandler(new SelectHandler() {
+	@Override
+	public void onSelect(SelectEvent event) {
+		storage.setItem("Storage."+storage.getLength(), value.getText());
+	}
+});
+```
+
+### 从 Storage 中读取数据<a id='Read'></a>
+
+数据以 key-value 对应的方式存储，所以需要通过 key 来获取数据。你需要知道 key 值是什么或通过遍历 index 来获取 key。
+
+```
+import com.google.gwt.storage.client.Storage;
+private FlexTable stocksFlexTable = new FlexTable();
+for (int i = 0; i < storage.getLength(); i++){
+	String key = storage.key(i);
+	stocksFlexTable.setText(i+1, 0, storage.getItem(key));
+}
+```
+
+### 删除数据<a id='Delete'></a>
+
+从 storage 中删除数据，可分为删除制定 key-value 和 清除整个 storage。如果想要删除指定的数据，需要知道 key 值。
+
+* 删除全部数据
+
+```
+storage.clear();
+```
+
+* 根据 key 值删除数据
+
+```
+VerticalLayoutContainer ver=new VerticalLayoutContainer();
+final TextField key=new TextField();
+ver.add(new FieldLabel(key,"key"));
+TextButton remove=new TextButton("删除");
+ver.add(remove);
+remove.addSelectHandler(new SelectHandler() {
+	@Override
+	public void onSelect(SelectEvent event) {
+		storage.removeItem(key.getText());
+	}
+});
+```
+
+### 检查 localstorage 是否变动<a id='Event'></a>
+
+因为使用同一个 storage，所以与这个 storage 相关的信息都需要变动。
+
+```
+Storage.addStorageEventHandler(new Handler() {
+	@Override
+	public void onStorageChange(StorageEvent event) {
+		//不是 storage 產生的 event 就忽略不管
+		if (storage != event.getStorageArea()) { return ;}
+		lastStockLabel.setText("Last Update: "+event.getNewValue() +": " +event.getOldValue() +": " +event.getUrl());
+	}
+});
+```
 
 ## 测试目标、步骤<a id='Test'></a>
 
@@ -60,31 +149,14 @@ Web Storage 提供了更大的本地存储空间，LocalStorage 为每个域 5MB
 
 ## 浏览器差异<a id='Difference'></a>
 
-* Browser 版本：chrome 46
-	* key 值容量上限：5MB
-	* value 值容量上限：4MB 1023KB 1023B(key 值无法为空，设为"0")
-	* key-value 是否共同占用 LocalStorage 的 hard disk 空间：是
-	* LocalStorage 的容量上限：5MB
-	* 达到容量上限后情况：出现 QuotaExceededError 错误
-* Browser 版本：Opera 33
-	* key 值容量上限：5MB
-	* value 值容量上限：4MB 1023KB 1023B(key 值无法为空，设为"0")
-	* key-value 是否共同占用 LocalStorage 的 hard disk 空间：是
-	* LocalStorage 的容量上限：5MB
-	* 达到容量上限后情况：出现 QuotaExceededError 错误
-* Browser 版本：IE 11
-	* key 值容量上限：4MB 786KB 832Byte
-	* value 值容量上限：4MB 786KB 831Byte(key 值无法为空，设为"0")
-	* key-value 是否共同占用 LocalStorage 的 hard disk 空间：是
-	* LocalStorage 的容量上限：4MB 786KB 832Byte
-	* 达到容量上限后情况：出现 QuotaExceededError 错误
-* Browser 版本：Firefox 42
-	* key 值容量上限：未测出（测到30MB，browser 快崩溃了 T_T）
-	* value 值容量上限：5MB(key 值无法为空，设为"0")
-	* key-value 是否共同占用 LocalStorage 的 hard disk 空间：否
-	* LocalStorage 的容量上限：5MB
-	* 达到容量上限后情况：value 值达到容量上限后，
-	出现 NS_ERROR_DOM_QUOTA_REACHED 异常
+|Browser 版本|key 容量上限| value 容量上限|key-value 共同占用 LocalStorage|LocalStorage 上限|达到上限后情况|
+|:----------:|:----------:|:-------------:|:-----------------------------:|:---------------:|:------------:|
+|Chrome 46|5MB|4MB 1023KB 1023B|是|5MB|出现 QuotaExceededError 错误|
+|Opera 33|5MB|4MB 1023KB 1023B|是|5MB|出现 QuotaExceededError 错误|
+|IE 11|4MB 786KB 832Byte|4MB 786KB 831Byte|是|5MB|出现 QuotaExceededError 错误|
+|Firefox 42|未测出|5MB|否|5MB|value 值达到容量上限后，出现 NS_ERROR_DOM_QUOTA_REACHED 异常|
 
 ## 结论<a id='Conclusion'></a>
 LocalStorage 容量上限大约为 5MB，不同的 browser 有不同的容量上限，key-value 值是否共同占用 LocalStorage 的 hard disk 也不同。并且每个 app 在不同的 browser 占用不同的 LocalStorage 的 hard disk 空间，互不影响。
+
+使用 local storage 可以在 client-side 缓存大量数据，可以代替从服务器下载。这样可以减少网络流量，并且加快了显示的时间，如果有网络断开，可以更快的恢复。
