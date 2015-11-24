@@ -10,7 +10,7 @@ HTML5 Storage
 
 ## WebStorage 簡介<a id='SummaryOfStorage'></a>
 
-Web Storage 是 HTML5 新增的本地存储的解决方案，在前端开发中经常用到，类似 HTML4 的 cookie，但并不是为了取代 cookie 制定的标准，而是为了解决本来不应该由 cookie 做的，却不得不用 cookie 的本地存储（[部分 browser 支持 Web Storage](http://caniuse.com/#feat=namevalue-storage)）。
+Web Storage 是 HTML5 新增的本地存储的解决方案，在前端开发中经常用到，类似于 cookie，但并不是为了取代 cookie 制定的标准，而是为了解决本来不应该由 cookie 做的，却不得不用 cookie 的本地存储。
 
 Web Storage 与 Cookie 相比，Web Storage 的本地存储空间更大，而 cookie 只有 4KB。Cookie 的内容会随着请求一并发送到服务器端，而 Web Storage 中的数据仅仅存在本地，不会与服务器发生交互。
 
@@ -31,7 +31,7 @@ Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）�
 
 从 GWT2.3 开始，GWT SDK 支持 HTML5 的 Web Storage。你可以通过调用 Storage.getLocalStorageIfSupported() 或者 Storage.getSessionStorageIfSupported() 取决于你想要使用的 storage 类型，接下来我们只使用 LocalStorage。
 
-因为不是所有的 browser 可以支持 Web Storage，所以你在使用前需要检查是否可以使用 HTML5 storage 功能。
+因为不是所有的 [browser 可以支持 Web Storage](http://caniuse.com/#feat=namevalue-storage)，所以你在使用前需要检查是否可以使用 HTML5 storage 功能。
 
 如果支持 storage 功能，你得到一个 storage object 后，你就可以向其中写入数据或读取数据。
 
@@ -43,24 +43,10 @@ Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）�
 6. [检查 localstorage 是否变动](#Event)
 
 ### 检查 browser 是否支持 storage<a id='Check'></a>
-在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能，但并不会有页面上的提示。所以我希望在 browser 不支持 storage 的时候，能在页面上提醒。并且判断过 browser 是否支持 storage 后不需要在操作 storage instance 时再判断。
-
-```
-if (!Storage.isLocalStorageSupported()) {
-	CenterLayoutContainer container = new CenterLayoutContainer();
-	container.add(new LabelToolItem("Local Storage is not supported"));
-	initWidget(container);
-	return;
-}
-```
+在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能。判断过 browser 是否支持 storage 后不需要在操作 storage instance 时通过查看 instance 是否是 null 来判断。通过使用 ```Storage.isLocalStorageSupported()```，如果返回值为 true，则 browser 支持 LocalStorage。
 
 ### 获取 Storage object<a id='Get'></a>
-在判断 browser 是否支持 Web Storage 后，可使用 Storage.getLocalStorageIfSupported() 来获取 localstorage instance，当然也可以使用 Storage.getLocalStorageIfSupported() 来判断 browser 是否支持 Web Storage，因为如果不支持，无法得到 instance，而是得到 null。
-
-```
-import com.google.gwt.storage.client.Storage;
-	private Storage storage = Storage.getLocalStorageIfSupported();
-```
+在判断 browser 是否支持 Web Storage 后，可使用 ```Storage.getLocalStorageIfSupported()``` 来获取 localstorage instance，如果 browser 不支持 LocalStorage，无法得到 instance，而是得到 null。
 
 ### 将数据写入 Storage<a id='Write'></a>
 
@@ -85,7 +71,6 @@ save.addSelectHandler(new SelectHandler() {
 数据以 key-value 对应的方式存储，所以需要通过 key 来获取数据。你需要知道 key 值是什么或通过遍历 index 来获取 key。
 
 ```
-import com.google.gwt.storage.client.Storage;
 private FlexTable stocksFlexTable = new FlexTable();
 for (int i = 0; i < storage.getLength(); i++){
 	String key = storage.key(i);
@@ -159,4 +144,4 @@ Storage.addStorageEventHandler(new Handler() {
 ## 结论<a id='Conclusion'></a>
 LocalStorage 容量上限大约为 5MB，不同的 browser 有不同的容量上限，key-value 值是否共同占用 LocalStorage 的 hard disk 也不同。并且每个 app 在不同的 browser 占用不同的 LocalStorage 的 hard disk 空间，互不影响。
 
-使用 local storage 可以在 client-side 缓存大量数据，可以代替从服务器下载。这样可以减少网络流量，并且加快了显示的时间，如果有网络断开，可以更快的恢复。
+使用 local storage ，一旦数据保存在 client-side，可减少不必要的数据请求，减少数据在 browser 和 server-side 之间不必要的来回传递，减少网络流量。从本地读取数据比通过网络从 server-side 获取数据快得多，可以加快显示的时间。
