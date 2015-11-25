@@ -43,7 +43,7 @@ Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）�
 6. [检查 localstorage 是否变动](#Event)
 
 ### 检查 browser 是否支持 storage<a id='Check'></a>
-在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能。判断过 browser 是否支持 storage 后不需要在操作 storage instance 时通过查看 instance 是否是 null 来判断。通过使用 ```Storage.isLocalStorageSupported()```，如果返回值为 true，则 browser 支持 LocalStorage。
+在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能。通过使用 ```Storage.isLocalStorageSupported()```，如果返回值为 true，则 browser 支持 LocalStorage。
 
 ### 获取 Storage object<a id='Get'></a>
 在判断 browser 是否支持 Web Storage 后，可使用 ```Storage storage = Storage.getLocalStorageIfSupported()``` 来获取 localstorage instance，如果 browser 不支持 LocalStorage，无法得到 instance，而是得到 null。
@@ -53,17 +53,8 @@ Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）�
 可以写入你喜欢的任何数据，前提是 key 和 value 都必须为 string 类型。
 
 ```
-VerticalLayoutContainer ver=new VerticalLayoutContainer();
-final TextField value=new TextField();
-ver.add(new FieldLabel(value,"value"));
-TextButton save=new TextButton("保存");
-ver.add(save);
-save.addSelectHandler(new SelectHandler() {
-	@Override
-	public void onSelect(SelectEvent event) {
-		storage.setItem("Storage."+storage.getLength(), value.getText());
-	}
-});
+String value = Window.prompt("请输入value值", "");
+storage.setItem("Storage." + storage.getLength(), value);
 ```
 
 ### 从 Storage 中读取数据<a id='Read'></a>
@@ -71,10 +62,10 @@ save.addSelectHandler(new SelectHandler() {
 数据以 key-value 对应的方式存储，所以需要通过 key 来获取数据。你需要知道 key 值是什么或通过遍历 index 来获取 key。
 
 ```
-private FlexTable stocksFlexTable = new FlexTable();
 for (int i = 0; i < storage.getLength(); i++){
 	String key = storage.key(i);
-	stocksFlexTable.setText(i+1, 0, storage.getItem(key));
+	GWT.log(key);
+	GWT.log(storage.getItem(key));
 }
 ```
 
@@ -88,20 +79,11 @@ for (int i = 0; i < storage.getLength(); i++){
 storage.clear();
 ```
 
-* 根据 key 值删除数据
+* 根据 key 值删除数据,如果 key 值不存在，storage 不改变,不会出现 Error 或 Exception。
 
 ```
-VerticalLayoutContainer ver=new VerticalLayoutContainer();
-final TextField key=new TextField();
-ver.add(new FieldLabel(key,"key"));
-TextButton remove=new TextButton("删除");
-ver.add(remove);
-remove.addSelectHandler(new SelectHandler() {
-	@Override
-	public void onSelect(SelectEvent event) {
-		storage.removeItem(key.getText());
-	}
-});
+String key = Window.prompt("请输入key值", "");
+storage.removeItem(key);
 ```
 
 ### 检查 localstorage 是否变动<a id='Event'></a>
@@ -114,7 +96,7 @@ Storage.addStorageEventHandler(new Handler() {
 	public void onStorageChange(StorageEvent event) {
 		//不是 storage 產生的 event 就忽略不管
 		if (storage != event.getStorageArea()) { return ;}
-		lastStockLabel.setText("Last Update: "+event.getNewValue() +": " +event.getOldValue() +": " +event.getUrl());
+		GWT.log("Last Update: "+event.getNewValue() +": " +event.getOldValue() +": " +event.getUrl());
 	}
 });
 ```
@@ -144,4 +126,4 @@ Storage.addStorageEventHandler(new Handler() {
 ## 结论<a id='Conclusion'></a>
 LocalStorage 容量上限大约为 5MB，不同的 browser 有不同的容量上限，key-value 值是否共同占用 LocalStorage 的 hard disk 也不同。并且每个 app 在不同的 browser 占用不同的 LocalStorage 的 hard disk 空间，互不影响。
 
-使用 local storage ，一旦数据保存在 client-side，可减少不必要的数据请求，减少数据在 browser 和 server-side 之间不必要的来回传递，减少网络流量。从本地读取数据比通过网络从 server-side 获取数据快得多，可以加快显示的时间。
+使用 local storage ，一旦数据保存在 client-side，可减少不必要的数据请求。并且与 cookie 相比，可减少数据在 browser 和 server-side 之间不必要的来回传递，减少网络流量。从本地读取数据比通过网络从 server-side 获取数据快得多，可以加快显示的时间。
