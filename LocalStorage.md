@@ -43,10 +43,10 @@ Web Storage 可分为 LocalStorage（针对没有时间限制的数据存储）�
 6. [检查 localstorage 是否变动](#Event)
 
 ### 检查 browser 是否支持 storage<a id='Check'></a>
-在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能。通过使用 ```Storage.isLocalStorageSupported()```，如果返回值为 true，则 browser 支持 LocalStorage。
+在获取 Storage object 之前，需要判断 browser 是否支持 Web Storage。Browser 不支持 Web Storage 则无法进行 storage 的增删改查等功能。通过使用 `Storage.isLocalStorageSupported()`，如果返回值为 true，则 browser 支持 LocalStorage。
 
 ### 获取 Storage object<a id='Get'></a>
-在判断 browser 是否支持 Web Storage 后，可使用 ```Storage storage = Storage.getLocalStorageIfSupported()``` 来获取 localstorage instance，如果 browser 不支持 LocalStorage，无法得到 instance，而是得到 null。
+在判断 browser 是否支持 Web Storage 后，可使用 `Storage storage = Storage.getLocalStorageIfSupported()` 来获取 localstorage instance，如果 browser 不支持 LocalStorage，无法得到 instance，而是得到 null。
 
 ### 将数据写入 Storage<a id='Write'></a>
 
